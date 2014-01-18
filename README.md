@@ -7,10 +7,10 @@ TODO:
 
 * [ ] Make children appear on same level
 * [ ] Implement functions
-* * [ ] findRange
-* * [ ] removeMin
-* * [ ] removeMax
-* * [ ] merge
+** [ ] findRange
+** [ ] removeMin
+** [ ] removeMax
+** [ ] merge
 
 
 May also want to think about returning to original algorithm for storing max.
@@ -21,4 +21,4 @@ Currently, each node's max is stored by the node itself, and is seperate from it
 
 Therefore, the first node has both the min and the max, so it knows the range of all its children.
 
-I believe removeMax should still be O(L), with every node doing the right side of the tree having to pass it's max up the ladder to it's parent. Haven't implemented yet, so not completely sure.
+I believe removeMax should still be O(L), with every node down the right side of the tree having to pass its max up the ladder to its parent. Haven't implemented yet, so not completely sure.
