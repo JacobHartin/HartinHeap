@@ -1,0 +1,388 @@
+<html>
+<head>
+  <title>Hartin Heap</title>
+  
+  <style>
+    .node {
+      position: absolute;
+    }
+    
+    .level1 {top: 50px;}
+    .level2 {top: 100px;}
+    .level3 {top: 150px;}
+    .level4 {top: 200px;}
+    .level5 {top: 250px;}
+  </style>
+</head>
+<body>
+
+  <div id="hartinHeap">
+  </div>
+
+
+  <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script>
+
+    function createNode(x) {
+      return {
+        value: x, // node's value
+        parent: null, // points to parent
+        previous: null, //points to smaller sibling
+        next: null, // points to larger sibling
+        first: null, // smallest child
+        last: null, // largest child
+        max: null // largest descendent
+      };
+    }
+    
+    function showNodes() {
+      $('#hartinHeap').html('');
+      showNode(root, 0);
+    }
+    function showNode(currentnode, level) {
+      var node = '<span class="node level' + level +'">' + currentnode.value;
+      
+      if(currentnode.max) {
+        node += '<sup>' + currentnode.max.value + '</sup>';
+      }
+      
+      
+      node += "</span>";
+      
+      $('#hartinHeap').append(node);
+      
+      if(currentnode.next) { 
+        //$('#hartinHeap').append(currentnode.value);
+        //console.log(currentnode.value + "'s next");
+        showNode(currentnode.next, level);
+      }
+      
+      $('#hartinHeap').append('<br>');
+      
+      if(currentnode.first) {
+        //$('#hartinHeap').append(currentnode.value);
+        //console.log(currentnode.value + "'s first");
+        showNode(currentnode.first, level + 1);
+      }
+    }
+
+    // No real handling of duplicates yet
+    function insert(x, currentnode) {
+      if (x.value < currentnode.value) {
+        // x becomes new parent
+        // parent gets popped off, readded to tree
+        var newNode = createNode(currentnode.value);
+        currentnode.value = x.value;
+        console.log('node is new parent');
+        insert(newNode, root);
+      }
+      else if (!currentnode.max){
+        x.parent = currentnode;
+        currentnode.max = x;
+        console.log('node is new max');
+      }
+      else if (x.value > currentnode.max.value) {
+        //max is placed at the end of its parent's child list
+        if(!currentnode.first) {
+          currentnode.first = currentnode.max;
+        }
+        if(currentnode.last) {
+          currentnode.last.next = currentnode.max;
+          currentnode.max.previous = currentnode.last;
+        }
+        currentnode.last = currentnode.max;
+        
+        //x becomes the new max
+        x.parent = currentnode;
+        currentnode.max = x;
+        
+        console.log('node is new max and old max is at end of parent\'s child list');
+      }
+      else{
+        if(!currentnode.first) {
+          x.parent = currentnode;
+          currentnode.first = x;
+          currentnode.last = x;
+        }
+        else if (x.value < currentnode.first.value) {
+          //x becomes new firstchild
+          x.next = currentnode.first;
+          x.parent = currentnode;
+          currentnode.first = x;
+          x.next.previous = x;
+          
+          console.log('node is new firstchild');
+        }
+        else {
+          var child = currentnode.last;
+          // for each child in currentnode's childlist going from biggest to smallest
+          while(child) {
+            if (x.value > child.value) {
+              insert(x, child);
+              return;
+            }
+            else child = child.previous;
+          }
+          
+          console.log('node is else, something is probably wrong');
+        }
+      }
+    }
+    
+    
+    function findMax() {
+      return !root ? "heap empty" : root.max ? root.max.value : root.value;
+    }
+    function findMin() {
+      return !root ? "heap empty" : root.value;
+    }
+    function removeMax() {
+      if(root.max) {
+        if(root.last) {
+          if (root.last.max) {
+            root.max = root.last.max;
+            // Move up root.last.maxs children if there are any
+          } else {
+            // This is complicated sometimes, and it's late :)
+          }
+        }
+        
+      }else {
+        root = null;
+      }
+    }
+    function removeMin() {
+      // root.left becomes root
+      // root's children becomes root.left's children
+      // root.left.max becomes root.left.last's max
+      // if it already has a max, it's max becomes its right sibling and gets the max instead
+      
+      /*
+      if (root.first != null) {
+        if (root.first.last != null) {
+          if (root.first.max is immediate descendent) {
+            root.last.next=root.max
+            root.max.previous=root.last
+          }
+          if (root.second_child exists) {
+            root.first.last.next=root.second_child
+            root.second_child.previous=root.first.last
+          }
+        }
+        else if (root.first.max != null) {
+          root.first.first=root.first.max
+          root.first.last=root.first.max
+          if root.second_child exists {
+            root.first.last.next=root.second_child
+            root.second_child.previous=root.first.last
+          }
+        }
+      }
+      else if (root.max != null) {
+        root = root.max
+      }
+      */
+    }
+    
+    function showValues() {
+      showValue(root);
+    }
+    function showValue(currentnode) {
+      console.log(currentnode.value);
+      if(currentnode.first) showValue(currentnode.first);
+      if(currentnode.max) showValue(currentnode.max);
+      if(currentnode.next) showValue(currentnode.next);
+    }
+    
+    function find(x, currentnode) {
+      if (x < currentnode.value || x > currentnode.max.value) {
+        console.log('no way');
+        return null;
+      }else {
+        if (x === currentnode.value) {
+          console.log('good');
+          return currentnode;
+        }else if (x === currentnode.max.value) {
+          return currentnode.max
+        }else {
+          var child = currentnode.last;
+          while(child) {
+            var result = find(x, child);
+            if (result) return result;
+            else child = child.previous;
+          }
+        }
+      }
+    }
+    
+    
+    
+    
+    
+    var root = createNode(1);
+    
+    insert(createNode(2), root);
+    insert(createNode(10), root);
+    insert(createNode(7), root);
+    insert(createNode(100), root);
+    insert(createNode(90), root);
+    insert(createNode(5), root);
+    insert(createNode(4), root);
+    insert(createNode(30), root);
+    
+    for(var i = 101; i < 201; ++i) {
+      var rand = Math.floor(Math.random() * 1000);
+      insert(createNode(rand), root);
+    }
+    
+    showNodes();
+    
+    
+    for(var i = 0; i < 10; ++i) {
+      $('.level' + i).each(function(i) {
+        $(this).css('left', i * 50);
+      });
+    }
+  </script>
+
+
+  <pre>
+  HartinHeap
+
+  Each node in the structure has the following attributes:
+  *parent   points to parent node
+  *previous points to smaller sibling
+  *next     points to larger sibling
+  *first    points to smallest child
+  *last     points to largest child
+  *max      points to largest descendent
+
+  All of these pointers are initially set to null.
+  The node pointed to by max will not be in the child list as well as in max.
+
+        [	parent	]
+          |
+  [smaller sibling]---[	node		]-----------[larger sibling]
+        |			|\
+        [s]-[]-[]-[]-[]-[l]  [max]
+
+  Operations:
+  FindMax()   O(1)
+  FindMin()   O(1)
+  RemoveMin() O(1)
+  RemoveMax() O(1)
+
+  These operations should have better worstcase running times
+  once I decide on a good restructuring algorithm
+  Insert(x,root)	O(n)
+  Merge(x,y,root)	O(n)
+  Find(x)		O(n)
+  FindRange(x,y)	O(n)
+
+
+  FindMin()
+  {
+    return root;
+  }
+  FindMax()
+  {
+    if root.max!=null
+      return root.max
+    else
+      return root
+  }
+  RemoveMin()
+  {
+    if root.first!=null
+    {
+      if root.first.last!=null
+      {
+        if root.first.max is immediate descendent
+        {
+          root.last.next=root.max
+          root.max.previous=root.last
+        }
+        if root.second_child exists
+        {
+          root.first.last.next=root.second_child
+          root.second_child.previous=root.first.last
+        }
+      }
+      else if root.first.max!=null
+      {
+        root.first.first=root.first.max
+        root.first.last=root.first.max
+        if root.second_child exists
+        {
+          root.first.last.next=root.second_child
+          root.second_child.previous=root.first.last
+        }
+      }
+    }
+    else if root.max!=null
+    {
+      root=root.max
+    }
+    
+  }
+  RemoveMax()
+  {
+    if max's parent has a child
+      max's left child becomes new max and is removed from child list
+    else if parent!=root
+      parent becomes new max and is removed from its parents child list
+    return old max
+  }
+  Insert(x,currentnode)
+  {
+    if x < currentnode
+      x becomes the parent of currentnode
+    else if currentnode does not have a max
+      currentnode's max=x
+    else if x>currentnode's max
+      max is placed at the end of its parent's child list
+      x becomes the new max
+    else
+      if x < currentnode.firstchild
+        x becomes new firstchild
+      else
+        for each child in currentnode's childlist going from biggest to smallest
+          if x>child
+            Insert(x,child)
+            return
+  }
+  Merge(x,y)
+  {
+    while y is not empty
+      Insert(RemoveMin(y),x)
+  }
+  Find(x,currentnode)
+  {
+    if x < currentnode or x> current.max
+      return null
+    else
+      if x == currentnode
+        return currentnode
+      else if x == currentnode.max
+        return currentnode.max
+      else
+        foreach child in currentnodes childlist
+          Find(x,child)		
+  }
+  FindRange(x,y,currentnode)
+  {
+    if currentnode>y or currentnode.max < x
+      return
+    else
+      if currentnode is in the interval
+        add currentnode to the list
+      if currentnode.max is in the interval
+        add currentnode.max to the list
+      foreach child in currentnodes childlist
+        FindRange(x,y,child)
+  }
+  </pre>
+
+
+</body>
+</html>
